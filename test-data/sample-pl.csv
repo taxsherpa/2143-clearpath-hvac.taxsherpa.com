@@ -1,0 +1,9 @@
+date,account_name,vendor,memo,amount
+2025-09-30,Sales – Services,,Invoice 1045,-50000
+2025-09-30,Wages,Gusto,Sep payroll,38000
+2025-09-30,Advertising,Meta,Facebook Ads Sep,6000
+2025-09-30,Software,Adobe,Creative Cloud,90
+2025-09-30,Contractors,Acme Subs,Roof crew – Job 771,12000
+2025-09-30,Payment Processing,Stripe,Fees Sep,1400
+2025-09-30,Rent,Main St LLC,Office rent,2500
+2025-09-30,Owner Draw,Neal,Distribution,6000

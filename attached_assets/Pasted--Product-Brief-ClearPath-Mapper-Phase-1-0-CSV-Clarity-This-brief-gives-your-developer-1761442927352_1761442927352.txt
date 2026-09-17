@@ -1,0 +1,346 @@
+# Product Brief — **ClearPath Mapper** (Phase 1.0: CSV → Clarity)
+
+This brief gives your developer everything needed to build an MVP that ingests a P&L CSV, walks the user through **category remapping/splitting**, and outputs a **ClearPath-formatted** report with **Money Compass** benchmarks. Scope is deliberately tight and shippable in <1–2 sprints worth of work (not promising timelines—just framing effort).
+
+
+
+---
+
+## 1) Goal (one sentence)
+
+Turn a messy P&L CSV into a **ClearPath** view (Revenue, Fulfillment/COGS, CAC, Systems, People, Taxes, Owner’s Pay, Profit) with **guided reclassification** and **benchmark deltas**, so owners instantly see where they’re off.
+
+---
+
+## 2) Phase 1.0 Scope (what *is* included)
+
+* **CSV upload** of monthly P&L (single period per file).
+* **Auto-pre-map pass** using simple heuristics (keywords & vendor hints).
+* **Guided mapping wizard** to reclassify and **split** ambiguous lines (e.g., “Wages” → Fulfillment vs. OpEx vs. Owner Comp).
+* **Persisted mapping rules** (per user, per vendor/keyword) for the next upload.
+* **ClearPath rollup** + **Money Compass** percentages and **benchmark flags**.
+* **Downloadable PDF/CSV** of the remapped statement and summary.
+* **Local-only** accounts (email/password); secure file handling.
+
+Out of scope (for later phases): QuickBooks/Gusto integrations, multi-entity consolidation, multi-period trends, ML-based suggestions, cohort benchmarks, user management/teams.
+
+---
+
+## 3) User stories (acceptance bullets)
+
+1. **Upload & ingest**
+
+   * As a user, I upload a CSV (UTF-8, headers present).
+   * The app parses rows and shows a pre-mapped table with confidence badges (High/Medium/Needs review).
+
+2. **Guided remapping**
+
+   * For any category the system marks “Needs review” (e.g., “Wages”), I get a **wizard** that:
+
+     * explains the ClearPath choice,
+     * lets me **split** the amount by % or dollars into **Fulfillment**, **People (OpEx)**, and **Owner Comp**,
+     * stores a reusable rule (by vendor, memo keyword, GL account) for future uploads.
+
+3. **Rules memory**
+
+   * Next upload auto-applies my prior rules; I can override and update them.
+
+4. **ClearPath view**
+
+   * I see totals for: Revenue, COGS/Fulfillment → **Real Revenue**, then CAC, Systems, People, **Owner’s Pay**, **Profit**, **Taxes** set-aside.
+   * I see each as **% of Real Revenue** with color status vs. tier benchmarks.
+
+5. **Export**
+
+   * I can download: (a) the **remapped P&L (CSV)**, (b) a **1-page PDF** summary with gauges and “Top 3 Off-Benchmark Items”.
+
+6. **Privacy**
+
+   * After export, I can delete the file & derived data (hard delete).
+
+---
+
+## 4) Input CSV contract (Phase 1.0)
+
+Minimum columns (case-insensitive, flexible matching):
+
+* `date` (YYYY-MM-DD or MM/YY) — month attribution
+* `account_name` — source GL/category (e.g., “Wages”, “Advertising”)
+* `vendor` — payee where available
+* `memo` — free text/description
+* `amount` — positive expenses, negative refunds (or provide `type`+`amount` if credits separate)
+* Optional: `class`, `location`, `customer`, `invoice` (ignored in P1.0)
+
+**Assumptions**
+
+* Single month per file (if multiple months are present, require user to pick the month to analyze).
+* Revenue rows are included (positive numbers for income if system expects sign flip—dev can normalize signs on ingest).
+
+---
+
+## 5) ClearPath categories (authoritative rollup)
+
+* **Revenue** (Altitude)
+* **COGS / Fulfillment** (Fuel) → *variable, tied to delivery; in services this includes scalable labor, contractor payouts, per-project tools*
+* **Customer Acquisition Cost (CAC)** (Engine Temp) → ads, sales comps, lead gen fees, CRMs used for selling
+* **Systems** (Stability) → software, rent, utilities, bank fees, licenses, non-selling tools
+* **People** (Weight) → admin/ops salaries & contractors not tied to delivery volume
+* **Owner’s Pay** (Owner Comp) → owner wages/distributions (backed out of OpEx)
+* **Profit** (Net profit target line)
+* **Taxes** (Set-aside % of Real Revenue)
+
+Money Compass framing + tiered benchmarks are taken directly from the doc. 
+
+---
+
+## 6) Benchmarks (Phase 1.0 static table)
+
+Evaluate **% of Real Revenue** (Revenue − COGS/Fulfillment). Use these ranges to flag **Under / Healthy / Over**.
+
+**At ~$250k Real Revenue**
+
+* Profit: **5%**
+* Owner’s Pay: **40–50%**
+* CAC: **15%**
+* Systems: **10%**
+* People: **5–15%**
+* Taxes: **15%**
+
+**At ~$500k Real Revenue**
+
+* Profit: **10%**
+* Owner’s Pay: **30–35%**
+* CAC: **15%**
+* Systems: **10%**
+* People: **15–20%**
+* Taxes: **15%**
+
+Phase 1.0: let user pick **their ballpark tier** (“<250k” or “250–500k” Real Revenue). Default by computed Real Revenue if omitted. 
+
+---
+
+## 7) Pre-mapping heuristics (deterministic, no AI in P1.0)
+
+Create a rule pipeline that assigns an **initial** ClearPath category and a confidence:
+
+**Heuristic order (first match wins)**
+
+1. **Account name regex**:
+
+   * `/^revenue|sales|income/i` → Revenue
+   * `/cogs|cost of goods|cost of sales|materials|inventory|shipping/i` → Fulfillment
+   * `/ad(s)?|advertis(e|ing)|facebook|google ads|meta|tiktok|linkedin|mailchimp|hubspot|stripe fees lead gen/i` → CAC
+   * `/rent|utilities|aws|azure|gcp|software|saas|zoom|slack|microsoft 365|adobe|bank fee|domain|hosting/i` → Systems
+   * `/payroll|salary|salaries|wage(s)?|benefit(s)?|hr|admin/i` → People (but **downgrade to Needs Review** if “wage”/“payroll” matched)
+2. **Vendor keyword list** (config yaml): maps common vendors to ClearPath (e.g., “Gusto/ADP” → Needs Review: People vs Owner’s Pay vs Fulfillment).
+3. **Memo hints**:
+
+   * contains `contractor`, `subcontract`, `per-job` → Fulfillment (Needs Review if “wage” present)
+   * contains `owner` or `distribution` → Owner’s Pay (Needs Review)
+4. **User rules** (highest priority when present; stored by `vendor` and optional `memo` substring)
+
+Confidence levels:
+
+* High (green): explicit account/vendor match with no known ambiguity.
+* Medium (yellow): common vendor or memo hint.
+* Needs Review (red): ambiguous categories (wages/payroll), or conflicts.
+
+---
+
+## 8) The **Wages Split** wizard (critical UX)
+
+When a line is tagged as **Wages/Payroll**:
+
+1. **Explain** (one sentence): “Some wages belong in Fulfillment (scales with delivery), others in People (OpEx), and owner pay is tracked separately.”
+2. **Ask**:
+
+   * “Is any of this tied directly to delivery volume?” → % or $ to **Fulfillment**
+   * “Is any of this administrative/management?” → % or $ to **People**
+   * “Is any of this paid to the owner(s)?” → % or $ to **Owner’s Pay**
+3. **Preview split** in real time; must total 100%.
+4. **Save rule** (scope dropdown): by vendor (default), by memo keyword, or by account.
+5. Apply split and continue.
+
+Repeat the same pattern for other common ambiguities:
+
+* **Software** used *only* for marketing → CAC vs Systems.
+* **Payment processor fees** → Fulfillment vs Systems (rule: per-transaction fees tied to sales → Fulfillment).
+* **Contractors** tagged by project/department.
+
+---
+
+## 9) Data model (minimal tables)
+
+**users**
+
+* id, email (unique), password_hash
+
+**uploads**
+
+* id, user_id, original_filename, month_start (date), status {parsed, mapped, exported, deleted}, created_at
+
+**lines**
+
+* id, upload_id, src_account, vendor, memo, amount_cents (signed), src_date, premap_category, premap_confidence
+
+**line_splits**
+
+* id, line_id, clearpath_category {revenue, fulfillment, cac, systems, people, owners_pay}, amount_cents
+
+**rules**
+
+* id, user_id, scope {vendor|account|memo_substring}, scope_value, target {category|split}, payload (json), priority (int), created_at, updated_at
+
+**reports**
+
+* id, upload_id, rollup_json, benchmarks_json, pdf_path, csv_path
+
+---
+
+## 10) Calculations (deterministic)
+
+```text
+RealRevenue = Revenue – Fulfillment
+Pct(x) = x / RealRevenue
+
+BenchFlag(x) ∈ {Under, Healthy, Over} using the tier table (choose nearest tier).
+TaxesReserve = 15% * RealRevenue  (display as planning gauge)
+```
+
+Output cards:
+
+* **Gauges**: Revenue, Fulfillment (% of Rev), Real Revenue, CAC % (of Real), Systems % (of Real), People % (of Real), Owner’s Pay % (of Real), Profit % (of Real), Taxes 15% set-aside.
+* **Top 3 variances**: largest absolute % deviations from Healthy band with plain-English hints (e.g., “People at 27% vs 15–20% target — consider pushing more delivery labor into Fulfillment or trimming admin overhead.”).
+
+Benchmarks and Money Compass definitions per manuscript. 
+
+---
+
+## 11) Example rule payloads
+
+**Vendor rule (Gusto payroll split):**
+
+```json
+{
+  "scope": "vendor",
+  "scope_value": "Gusto",
+  "target": "split",
+  "payload": {
+    "owners_pay_pct": 20,
+    "fulfillment_pct": 50,
+    "people_pct": 30
+  },
+  "priority": 50
+}
+```
+
+**Keyword rule (memo contains “Facebook Ads” → CAC):**
+
+```json
+{
+  "scope": "memo_substring",
+  "scope_value": "facebook ads",
+  "target": "category",
+  "payload": {"category": "cac"},
+  "priority": 80
+}
+```
+
+---
+
+## 12) UI flow (single-page app happy path)
+
+1. **Upload** → file validated → parsed preview.
+2. **Auto-map summary**: pie of premap categories + list of “Needs review”.
+3. **Wizard queue**: step through ambiguous buckets (Wages first).
+4. **Review table**: editable chips per line (category), split editor when applied.
+5. **Report**: gauges + benchmark badges + Top 3 variances.
+6. **Export** buttons: Remapped CSV, 1-page PDF.
+7. **Save**: rules saved automatically; upload retained for re-download; “Delete data” option.
+
+---
+
+## 13) Tech choices (pragmatic, fast)
+
+* **Backend**: Node (Nest/Fastify) or Python (FastAPI). Use whichever the dev ships faster.
+* **DB**: Postgres (jsonb for rule payloads).
+* **File storage**: S3-compatible bucket (signed URLs), or local disk in dev.
+* **Frontend**: React + TypeScript (Vite). Component lib optional.
+* **PDF**: Server-side HTML → PDF (Playwright).
+* **Auth**: Email/password + JWT. Rate limit uploads.
+
+---
+
+## 14) Security & privacy (non-negotiable basics)
+
+* Max file size (e.g., 10MB). Only `.csv`.
+* Server-side validation & sanitization.
+* Row-level access by `user_id`.
+* **Explicit Delete** function to purge `uploads`, `lines`, `line_splits`, `reports`, and files.
+* Log audit (upload, export, delete events only).
+
+---
+
+## 15) Edge cases to handle
+
+* Duplicate headers / weird capitalization → normalize.
+* All wages in one line → force split wizard.
+* Negative amounts (refunds) → honor sign; allow split of negatives.
+* Empty vendor/memo → rules by account still apply.
+* RealRevenue ≤ 0 → show “Insufficient margin” warning; still render report.
+
+---
+
+## 16) Test fixtures (give QA something real)
+
+**Sample CSV header (one month):**
+
+```
+date,account_name,vendor,memo,amount
+2025-09-30,Sales – Services,,Invoice 1045,-50000
+2025-09-30,Wages,Gusto,Sep payroll,38000
+2025-09-30,Advertising,Meta,Facebook Ads Sep,6000
+2025-09-30,Software,Adobe,Creative Cloud,90
+2025-09-30,Contractors,Acme Subs,Roof crew – Job 771,12000
+2025-09-30,Payment Processing,Stripe,Fees Sep,1400
+2025-09-30,Rent,Main St LLC,Office rent,2500
+2025-09-30,Owner Draw,Neal,Distribution,6000
+```
+
+Expected mapping after wizard:
+
+* Revenue: 50,000
+* Fulfillment: contractors 12,000 + **part of** wages + **Stripe fees** (if per-transaction) → wizard decides
+* CAC: 6,000 (Meta)
+* Systems: Adobe 90, Rent 2,500
+* People: the admin slice of wages
+* Owner’s Pay: 6,000 + owner wage slice
+* Profit: computed; Taxes: 15% of Real Revenue
+
+---
+
+## 17) Acceptance criteria (binary)
+
+* Upload parses ≥ 5k rows in < 10s.
+* Mapping wizard supports at least **% split** across **Fulfillment / People / Owner’s Pay** and persists rule.
+* Re-upload with same vendors **auto-applies** prior rules.
+* Report shows **all Money Compass gauges** with **% of Real Revenue** and **benchmark status**.
+* Exports work (CSV remapped; 1-page PDF summary).
+* Delete purges all user data for that upload.
+
+---
+
+## 18) Roadmap notes (beyond 1.0)
+
+* **QBO/Xero** connectors; **bank rules** importer.
+* **Multi-period** trends; cohort vs. peers; industry NAICS overlay.
+* **Model suggestions** (LLM) with rationales.
+* **Role-based access** and auditor links.
+
+---
+
+### Why this is the right product
+
+You’re not competing with tax parsers. You’re giving owners the **cockpit**: a **reclassification UX** that reveals *true* margins and points to the 2–3 fixes that matter. That’s unique, sticky, and squarely in your IP. 
+
+If you want, I’ll turn this into a clickable wireframe and a JSON import contract your dev can drop in on day one.

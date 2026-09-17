@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- No maximum-scale: WCAG 1.4.4 requires text to be resizable up to 200% by pinch-zoom;
+         capping it here would fight the font-size setting Phase 4.3 adds below. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Transform your messy P&L CSV into actionable ClearPath insights with Money Compass benchmarks and guided category mapping." />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+    <title>ClearPath Mapper - P&L Analysis Dashboard</title>
+    <script>
+      // Apply the visitor's saved display settings before first paint, so the page never
+      // flashes the default theme/font/size before React mounts (Phase 4.3).
+      (function () {
+        try {
+          var raw = localStorage.getItem("cpm:accessibility");
+          var s = raw ? JSON.parse(raw) : {};
+          var root = document.documentElement;
+          root.classList.toggle("dark", s.colorMode === "dark");
+          root.setAttribute("data-contrast", s.colorMode === "high-contrast" ? "high" : "normal");
+          root.setAttribute("data-font", s.fontFamily || "default");
+          root.setAttribute("data-fontsize", s.fontSize || "default");
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,22 @@
+Profit and Loss
+January - March 2026
+
+Account,Jan 2026,Feb 2026,Mar 2026
+Income,
+  Sales - Services,50000.00,52000.00,55000.00
+  Sales - Products,8000.00,7500.00,9000.00
+Total Income,58000.00,59500.00,64000.00
+Cost of Goods Sold,
+  Materials,7000.00,7200.00,7800.00
+  Payment Processing,1400.00,1450.00,1520.00
+Total COGS,8400.00,8650.00,9320.00
+Gross Profit,49600.00,50850.00,54680.00
+Expenses,
+  Advertising,6000.00,6200.00,6500.00
+  Contractors,12000.00,12500.00,13000.00
+  Wages,15000.00,15000.00,15500.00
+  Software,90.00,90.00,120.00
+  Rent,2500.00,2500.00,2500.00
+  Owner Draw,6000.00,6000.00,6000.00
+Total Expenses,41590.00,42290.00,43620.00
+Net Operating Income,8010.00,8560.00,11060.00
