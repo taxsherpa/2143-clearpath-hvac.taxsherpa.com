@@ -6,7 +6,7 @@ export default function Privacy() {
     <LegalPage title="Privacy Policy" updated="September 7, 2026">
       <Section title="The short version">
         <p>
-          ClearPath Mapper stores the financial data you upload — your Profit &amp; Loss
+          ClearPath HVAC stores the financial data you upload — your Profit &amp; Loss
           statements, how you map their line items to the ClearPath categories, and the reports
           generated from them — for as long as your account exists, unless you delete it
           yourself. We do not sell your data. Tax Sherpa and its affiliates may use your email to
@@ -72,7 +72,7 @@ export default function Privacy() {
 
       <Section title="Who can see your data">
         <p>
-          Your uploads and mappings are private to your account. ClearPath Mapper is multi-tenant
+          Your uploads and mappings are private to your account. ClearPath HVAC is multi-tenant
           software: other accounts cannot see your data, and you cannot see theirs. Staff access
           is limited to what's needed to operate, secure, and support the service.
         </p>
@@ -93,7 +93,7 @@ export default function Privacy() {
 
       <Section title="Children's privacy">
         <p>
-          ClearPath Mapper is a business tool for adults managing a company's finances. It is not
+          ClearPath HVAC is a business tool for adults managing a company's finances. It is not
           directed at children, and we do not knowingly collect information from children.
         </p>
       </Section>
@@ -107,7 +107,7 @@ export default function Privacy() {
 
       <Section title="Who we are">
         <p>
-          ClearPath Mapper is operated by <strong>Online Tax Solutions Group LLC</strong>, doing
+          ClearPath HVAC is operated by <strong>Online Tax Solutions Group LLC</strong>, doing
           business as Tax Sherpa, 2302 Parklake Dr NE, Ste 675, Atlanta, GA 30345.
         </p>
       </Section>

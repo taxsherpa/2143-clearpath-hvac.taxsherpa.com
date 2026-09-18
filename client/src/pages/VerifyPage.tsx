@@ -40,7 +40,7 @@ export default function VerifyPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
             <TrendingUp className="h-8 w-8 text-primary" />
           </div>
-          <h1 className="text-3xl font-bold mb-2">ClearPath Mapper</h1>
+          <h1 className="text-3xl font-bold mb-2">ClearPath HVAC</h1>
         </div>
 
         <Card className="p-6 text-center space-y-5">

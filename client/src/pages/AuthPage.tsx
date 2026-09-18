@@ -40,8 +40,8 @@ export default function AuthPage() {
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
               <TrendingUp className="h-8 w-8 text-primary" />
             </div>
-            <h1 className="text-3xl font-bold mb-2">ClearPath Mapper</h1>
-            <p className="text-muted-foreground">See where your money actually goes</p>
+            <h1 className="text-3xl font-bold mb-2">ClearPath HVAC</h1>
+            <p className="text-muted-foreground">See where your money actually goes — measured against HVAC shops your size</p>
           </div>
 
           <Card className="p-6">
@@ -57,7 +57,7 @@ export default function AuthPage() {
                     // answers identically either way, and so does the page.
                     <p className="text-sm text-muted-foreground">
                       We sent an email to <span className="font-medium text-foreground">{sentTo}</span>.
-                      If this address has ClearPath Mapper access, it contains a sign-in link that works
+                      If this address has ClearPath HVAC access, it contains a sign-in link that works
                       once and expires in 20 minutes. If not, it explains how to get access.
                     </p>
                   ) : (
@@ -92,7 +92,7 @@ export default function AuthPage() {
                   />
                   <p className="text-xs text-muted-foreground">
                     {gated
-                      ? "No password needed. Use the email you registered with — ClearPath Mapper access comes with a Tax Sherpa workshop ticket."
+                      ? "No password needed. Use the email you registered with — ClearPath HVAC access comes with a Tax Sherpa workshop ticket."
                       : "No password needed. We'll email you a secure sign-in link. If you don't have an account yet, one is created the first time you sign in."}
                   </p>
                 </div>
@@ -116,7 +116,7 @@ export default function AuthPage() {
           <h2 className="text-3xl font-bold">The ClearPath Insight Framework</h2>
           <div className="space-y-4 text-muted-foreground">
             <p>
-              Upload your P&amp;L export and ClearPath Mapper sorts every line into the categories
+              Upload your P&amp;L export and ClearPath HVAC sorts every line into the categories
               that actually drive your business — then shows you where you stand against the
               benchmarks for your revenue tier.
             </p>

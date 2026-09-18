@@ -29,10 +29,10 @@ export default function AccessEndedPage({ info }: { info: AccessEnded }) {
 
   const heading = notStarted ? "Your access hasn't started yet" : "Your access has ended";
   const body = notStarted
-    ? `Your ClearPath Mapper access starts on ${formatDate(info.startsAt!)}. Come back on or after that date.`
+    ? `Your ClearPath HVAC access starts on ${formatDate(info.startsAt!)}. Come back on or after that date.`
     : info.endedAt
-      ? `Your ClearPath Mapper access ended on ${formatDate(info.endedAt)}. Your uploads and reports are still saved, and they'll be here if you renew.`
-      : "There's no active ClearPath Mapper access for this account. Access is included with a Tax Sherpa workshop ticket.";
+      ? `Your ClearPath HVAC access ended on ${formatDate(info.endedAt)}. Your uploads and reports are still saved, and they'll be here if you renew.`
+      : "There's no active ClearPath HVAC access for this account. Access is included with a Tax Sherpa workshop ticket.";
 
   const handleDeleteData = async () => {
     const confirmed = window.confirm(
@@ -64,7 +64,7 @@ export default function AccessEndedPage({ info }: { info: AccessEnded }) {
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
               <TrendingUp className="h-8 w-8 text-primary" />
             </div>
-            <h1 className="text-3xl font-bold mb-2">ClearPath Mapper</h1>
+            <h1 className="text-3xl font-bold mb-2">ClearPath HVAC</h1>
           </div>
 
           <Card className="p-6 text-center space-y-5" data-testid="access-ended">

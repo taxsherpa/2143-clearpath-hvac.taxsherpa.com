@@ -70,7 +70,7 @@ export function AppSidebar() {
           </div>
           <div>
             <h1 className="font-semibold text-sm">ClearPath</h1>
-            <p className="text-xs text-muted-foreground">Financial Mapper</p>
+            <p className="text-xs text-muted-foreground">For HVAC shops</p>
           </div>
         </div>
       </SidebarHeader>

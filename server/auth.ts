@@ -227,7 +227,7 @@ export function setupAuth(app: Express) {
         const access = await getAccessStatus(claimed.email);
         if (!access.active) {
           return res.status(403).json({
-            error: "This email doesn't have active ClearPath Mapper access.",
+            error: "This email doesn't have active ClearPath HVAC access.",
             code: "access_expired",
           });
         }

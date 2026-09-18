@@ -6,7 +6,7 @@ export default function Terms() {
     <LegalPage title="Terms of Service" updated="September 7, 2026">
       <Section title="The short version">
         <p>
-          ClearPath Mapper is a diagnostic tool that maps your business's Profit &amp; Loss
+          ClearPath HVAC is a diagnostic tool that maps your business's Profit &amp; Loss
           statement onto the ClearPath Insight Framework and shows you how it compares to
           benchmarks for businesses your size. It's meant to give you a clear, plain-English read
           on where your business stands — it is not tax, legal, financial, or accounting advice,
@@ -17,7 +17,7 @@ export default function Terms() {
 
       <Section title="What the service is">
         <p>
-          ClearPath Mapper lets you upload a P&amp;L export, review and correct how its line
+          ClearPath HVAC lets you upload a P&amp;L export, review and correct how its line
           items are sorted into the ClearPath Insight Framework's categories, and view a
           scorecard and reports comparing your business to benchmark ranges for your revenue
           tier. It is an educational and diagnostic tool, not a substitute for advice from a
@@ -57,7 +57,7 @@ export default function Terms() {
 
       <Section title="Acceptable use">
         <p>
-          Don't use ClearPath Mapper to upload data you don't have the right to use, to attempt
+          Don't use ClearPath HVAC to upload data you don't have the right to use, to attempt
           to access another account's data, to interfere with the service's operation, or to
           reverse-engineer or resell the tool itself. We may suspend or terminate access for use
           that violates these Terms.
@@ -66,7 +66,7 @@ export default function Terms() {
 
       <Section title="No warranty">
         <p>
-          ClearPath Mapper is provided "as is." The ClearPath Insight Framework's benchmarks and
+          ClearPath HVAC is provided "as is." The ClearPath Insight Framework's benchmarks and
           categorizations are general guidance, not tailored professional advice, and we make no
           guarantee that the tool's outputs are complete, accurate, or fit for any particular
           purpose — including where a PDF or CSV export doesn't parse the way you expect, or
@@ -79,7 +79,7 @@ export default function Terms() {
         <p>
           To the maximum extent permitted by law, Online Tax Solutions Group LLC (dba Tax Sherpa)
           is not liable for any indirect, incidental, or consequential damages arising from your
-          use of ClearPath Mapper, including decisions made based on its reports. Our total
+          use of ClearPath HVAC, including decisions made based on its reports. Our total
           liability for any claim relating to the service is limited to the amount, if any, you
           paid us for it in the twelve months before the claim arose.
         </p>
@@ -102,7 +102,7 @@ export default function Terms() {
 
       <Section title="Who we are">
         <p>
-          ClearPath Mapper is operated by <strong>Online Tax Solutions Group LLC</strong>, doing
+          ClearPath HVAC is operated by <strong>Online Tax Solutions Group LLC</strong>, doing
           business as Tax Sherpa, 2302 Parklake Dr NE, Ste 675, Atlanta, GA 30345.
         </p>
       </Section>

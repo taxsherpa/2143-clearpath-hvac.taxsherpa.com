@@ -48,7 +48,7 @@ export default function DashboardHeader({
       <div className="space-y-1">
         <div className="flex items-center gap-3">
           <h1 className="text-3xl font-semibold" data-testid="text-title">
-            ClearPath Report
+            ClearPath HVAC Report
           </h1>
           <Badge variant="secondary" data-testid="badge-tier">
             {tierLabels[revenueTier] || revenueTier}

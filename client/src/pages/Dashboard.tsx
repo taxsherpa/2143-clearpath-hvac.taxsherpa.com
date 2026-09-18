@@ -287,9 +287,15 @@ export default function Dashboard() {
   };
 
 
+  // An annual statement starts in January, so the month label read "January 2025" on a
+  // Jan-Dec upload — the one line on the page that looked like a mistake. The server already
+  // knows what kind of statement it is; use that.
+  const isAnnualStatement = typeof periodBasis === 'string' && periodBasis.startsWith('Annual');
   const displayLabel = isAnnualView
     ? (view === 'annual' ? `Full Year ${year}` : `Year-to-Date ${year}`)
-    : formatMonthLabel(upload.monthStart);
+    : isAnnualStatement
+      ? `Full Year ${new Date(upload.monthStart).getUTCFullYear()}`
+      : formatMonthLabel(upload.monthStart);
 
   return (
     <div className="min-h-screen bg-background">
@@ -297,7 +303,7 @@ export default function Dashboard() {
         <div className="space-y-8">
           <DashboardHeader
             monthLabel={displayLabel}
-            revenueTier={tier}
+            revenueTier={hvac?.tierLabel ?? tier}
             onExportCSV={handleExportCSV}
             onExportPDF={handleExportPDF}
             onDelete={handleDelete}

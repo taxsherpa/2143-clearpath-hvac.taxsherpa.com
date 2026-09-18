@@ -8,7 +8,7 @@ export function LegalPage({ title, updated, children }: { title: string; updated
       <div className="flex-1 max-w-2xl mx-auto px-6 py-12 space-y-6 w-full">
         <div>
           <Link href="/" className="text-sm text-blue-600 hover:underline dark:text-blue-400">
-            &larr; Back to ClearPath Mapper
+            &larr; Back to ClearPath HVAC
           </Link>
         </div>
         <div>

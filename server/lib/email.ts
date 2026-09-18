@@ -1,6 +1,6 @@
 import { Resend } from "resend";
 
-const FROM = process.env.RESEND_FROM_EMAIL || "ClearPath Mapper <login@clearpathmap.taxsherpa.com>";
+const FROM = process.env.RESEND_FROM_EMAIL || "ClearPath HVAC <login@clearpathmap.taxsherpa.com>";
 
 let client: Resend | null = null;
 
@@ -46,9 +46,9 @@ export async function sendMagicLinkEmail(opts: {
       <tr><td align="center">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border-radius:12px;padding:32px;">
           <tr><td>
-            <h1 style="margin:0 0 8px;font-size:20px;color:#111827;">Sign in to ClearPath Mapper</h1>
+            <h1 style="margin:0 0 8px;font-size:20px;color:#111827;">Sign in to ClearPath HVAC</h1>
             <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#4b5563;">
-              Click the button below to open your ClearPath Mapper account. This link works once
+              Click the button below to open your ClearPath HVAC account. This link works once
               and expires in ${opts.expiresInMinutes} minutes.
             </p>
             <table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="border-radius:8px;background:#1d4ed8;">
@@ -73,7 +73,7 @@ export async function sendMagicLinkEmail(opts: {
 </html>`.trim();
 
   const text = [
-    "Sign in to ClearPath Mapper",
+    "Sign in to ClearPath HVAC",
     "",
     `Open this link to sign in (works once, expires in ${opts.expiresInMinutes} minutes):`,
     url,
@@ -84,7 +84,7 @@ export async function sendMagicLinkEmail(opts: {
     "For help, get in touch through the website rather than replying here.",
   ].join("\n");
 
-  await deliver({ kind: "magic-link", to: opts.to, subject: "Your ClearPath Mapper sign-in link", html, text });
+  await deliver({ kind: "magic-link", to: opts.to, subject: "Your ClearPath HVAC sign-in link", html, text });
 }
 
 /**
@@ -102,10 +102,10 @@ export async function sendNoAccessEmail(opts: {
     d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" });
 
   const reason = opts.startsAt
-    ? `Your ClearPath Mapper access starts on ${formatDate(opts.startsAt)}. Request a sign-in link again on or after that date.`
+    ? `Your ClearPath HVAC access starts on ${formatDate(opts.startsAt)}. Request a sign-in link again on or after that date.`
     : opts.endedAt
-      ? `Your ClearPath Mapper access ended on ${formatDate(opts.endedAt)}. Your uploads and reports are still saved, and they'll be there if you renew.`
-      : "There's no active ClearPath Mapper access for this email address. Access is included with a Tax Sherpa workshop ticket.";
+      ? `Your ClearPath HVAC access ended on ${formatDate(opts.endedAt)}. Your uploads and reports are still saved, and they'll be there if you renew.`
+      : "There's no active ClearPath HVAC access for this email address. Access is included with a Tax Sherpa workshop ticket.";
 
   const cta = !opts.startsAt && opts.purchaseUrl
     ? { label: opts.endedAt ? "Renew access" : "Get access", url: opts.purchaseUrl }
@@ -121,7 +121,7 @@ export async function sendNoAccessEmail(opts: {
       <tr><td align="center">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border-radius:12px;padding:32px;">
           <tr><td>
-            <h1 style="margin:0 0 8px;font-size:20px;color:#111827;">About your ClearPath Mapper sign-in</h1>
+            <h1 style="margin:0 0 8px;font-size:20px;color:#111827;">About your ClearPath HVAC sign-in</h1>
             <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#4b5563;">${safeReason}</p>
             ${cta ? `<table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="border-radius:8px;background:#1d4ed8;">
               <a href="${safeCtaUrl}" style="display:inline-block;padding:13px 22px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;">${cta.label}</a>
@@ -141,7 +141,7 @@ export async function sendNoAccessEmail(opts: {
 </html>`.trim();
 
   const text = [
-    "About your ClearPath Mapper sign-in",
+    "About your ClearPath HVAC sign-in",
     "",
     reason,
     ...(cta ? ["", `${cta.label}: ${cta.url}`] : []),
@@ -149,7 +149,7 @@ export async function sendNoAccessEmail(opts: {
     "If you didn't request a sign-in link, you can ignore this email.",
   ].join("\n");
 
-  await deliver({ kind: "no-access", to: opts.to, subject: "About your ClearPath Mapper sign-in", html, text });
+  await deliver({ kind: "no-access", to: opts.to, subject: "About your ClearPath HVAC sign-in", html, text });
 }
 
 type OutgoingEmail = { kind: "magic-link" | "no-access"; to: string; subject: string; html: string; text: string };
