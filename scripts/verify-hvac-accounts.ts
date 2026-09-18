@@ -129,5 +129,18 @@ console.log("\nOwner pay hiding in operating expenses");
   check("an unmapped line is not a finding", unmapped === null);
 }
 
+console.log("\nLines a real upload got wrong (2026-09-18)");
+// From the first live upload: an HVAC shop's "Contractors" line is the crew doing the billable
+// work, and a bare "Wages" line is office payroll unless it says otherwise. Both had fallen
+// through to OpEx Systems.
+expect("Contractors", "fulfillment_services");
+expect("Contract labor", "fulfillment_services");
+expect("Wages", "opex_people");
+expect("Salaries", "opex_people");
+expect("Payroll taxes", "opex_people");
+// The field-labour phrasings still win, because their rule runs first.
+expect("Technician wages", "fulfillment_services");
+expect("Install labor", "fulfillment_services");
+
 console.log(`\nPASS: ${pass}   FAIL: ${fail}\n`);
 process.exit(fail > 0 ? 1 : 0);

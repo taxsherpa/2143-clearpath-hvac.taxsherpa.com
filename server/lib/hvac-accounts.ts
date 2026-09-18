@@ -91,7 +91,8 @@ const RULES: Rule[] = [
       "technician", "tech wage", "tech pay", "tech labor", "tech labour", "installer",
       "install labor", "install labour", "service labor", "service labour", "field labor",
       "field labour", "apprentice", "helper wage", "crew", "subcontractor", "sub labor",
-      "1099 labor", "permit", "inspection fee", "equipment rental", "tool rental",
+      "1099 labor", "contractor", "contract labor", "permit", "inspection fee",
+      "equipment rental", "tool rental",
       "dumpster", "disposal", "haul away", "warranty work", "callback", "call back",
       "workers comp", "workers' comp", "tech commission", "spiff", "job bonus",
     ],
@@ -117,6 +118,7 @@ const RULES: Rule[] = [
     confidence: "medium",
     reason: "Non-field payroll — office and admin",
     any: [
+      "wages", "salaries", "payroll", "payroll taxes",
       "dispatcher", "dispatch wage", "csr", "customer service rep", "office manager",
       "office staff", "office wage", "office salary", "admin wage", "admin salary",
       "administrative", "bookkeeper", "receptionist", "general manager", "gm salary",
