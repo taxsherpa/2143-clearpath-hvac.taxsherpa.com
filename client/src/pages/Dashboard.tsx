@@ -4,8 +4,6 @@ import { useLocation, useSearch } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import DashboardHeader from "@/components/DashboardHeader";
-import { StoplightMeter } from "@/components/StoplightMeter";
-import VarianceAlert from "@/components/VarianceAlert";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -187,6 +185,15 @@ export default function Dashboard() {
   const metrics = (data as any)?.metrics || {};
   const variances = (data as any)?.variances || [];
   const hvac = (data as any)?.hvac as HvacScorecardData | undefined;
+
+  // Everything on this screen is a share of revenue now, because that is the axis the HVAC
+  // benchmark report uses and the one owners actually think in. Neal, 2026-09-17: "nobody knows
+  // what gross profit is… they get lost immediately."
+  const pctOfRevenue = (value: number | null | undefined): number | null => {
+    const revenue = (data as any)?.metrics?.revenue;
+    if (!revenue || value === null || value === undefined) return null;
+    return (value / revenue) * 100;
+  };
   const upload = (data as any)?.upload || {};
   const periodBasis: string | undefined = (data as any)?.periodBasis;
   const withinUploadPeriods: { id: string; label: string; confirmed: boolean }[] = (data as any)?.periods || [];
@@ -279,20 +286,6 @@ export default function Dashboard() {
     }
   };
 
-  const getVarianceRecommendation = (category: string): string => {
-    const recommendations: Record<string, string> = {
-      'operational net profit':
-        "Operational Net Profit is below target. This is the money the business actually generates before anything is routed to you — grow revenue, or bring delivery and overhead costs down.",
-      'cac': 'CAC is above target. Consider optimizing ad spend, improving conversion rates, or focusing on organic growth channels.',
-      'opex people': 'OpEx People is above target. Consider whether some of that labor is really delivery work that belongs in Fulfillment Services, or review team size.',
-      'opex systems': 'OpEx Systems is above target. Review software subscriptions and infrastructure spend for optimization opportunities.',
-      'fulfillment': 'Fulfillment costs are above target. Review cost of goods/services and supplier contracts — the COGS and Services split above shows which side is driving it.',
-    };
-
-    const lower = category.toLowerCase();
-    const key = Object.keys(recommendations).find(k => lower.includes(k));
-    return key ? recommendations[key] : 'Review this category for optimization opportunities.';
-  };
 
   const displayLabel = isAnnualView
     ? (view === 'annual' ? `Full Year ${year}` : `Year-to-Date ${year}`)
@@ -387,9 +380,11 @@ export default function Dashboard() {
                 <div className="text-xs text-muted-foreground mt-1">Revenue minus Fulfillment</div>
               </Card>
               <Card className="p-4">
-                <div className="text-sm text-muted-foreground">Tier</div>
-                <div className="text-2xl font-bold">{formatTierLabel(tier)}</div>
-                <div className="text-xs text-muted-foreground mt-1">{periodBasis ?? "By annualized Gross Profit"}</div>
+                <div className="text-sm text-muted-foreground">Revenue tier</div>
+                <div className="text-2xl font-bold">{hvac?.tierLabel ?? formatTierLabel(tier)}</div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  {hvac ? "By annualised revenue, per the HVAC benchmark report" : (periodBasis ?? "By annualized Gross Profit")}
+                </div>
               </Card>
             </div>
           </div>
@@ -401,80 +396,6 @@ export default function Dashboard() {
           )}
 
           <div>
-            <h2 className="text-xl font-semibold mb-2">Basecamp Scorecard</h2>
-            <p className="text-sm text-muted-foreground mb-6">
-              How efficiently the business operates. Each figure is measured against Gross Profit,
-              except Fulfillment, which is measured against Revenue. The lit band shows how far
-              from target you are, and which side of it.
-            </p>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-              <StoplightMeter
-                label="Fulfillment"
-                currentPct={metrics.fulfillmentPct}
-                targetPct={getTargetPct('fulfillment')}
-                dollarValue={formatCurrency(metrics.fulfillment)}
-                basisLabel="of revenue"
-              />
-              <StoplightMeter
-                label="CAC"
-                currentPct={metrics.cacPct}
-                targetPct={getTargetPct('cac')}
-                dollarValue={formatCurrency(metrics.cac)}
-                basisLabel="of gross profit"
-                explainer={CATEGORY_EXPLAINERS.cac}
-              />
-              <StoplightMeter
-                label="OpEx Systems"
-                currentPct={metrics.opexSystemsPct}
-                targetPct={getTargetPct('opexSystems')}
-                dollarValue={formatCurrency(metrics.opexSystems)}
-                basisLabel="of gross profit"
-                explainer={CATEGORY_EXPLAINERS.opex_systems}
-              />
-              <StoplightMeter
-                label="OpEx People"
-                currentPct={metrics.opexPeoplePct}
-                targetPct={getTargetPct('opexPeople')}
-                dollarValue={formatCurrency(metrics.opexPeople)}
-                basisLabel="of gross profit"
-                explainer={CATEGORY_EXPLAINERS.opex_people}
-              />
-              <StoplightMeter
-                label="Operational Net Profit"
-                currentPct={metrics.operationalNetProfitPct}
-                targetPct={getTargetPct('operationalNetProfit')}
-                dollarValue={formatCurrency(metrics.operationalNetProfit)}
-                isProfit={true}
-                basisLabel="of gross profit"
-                explainer={METRIC_EXPLAINERS.operationalNetProfit}
-              />
-            </div>
-
-            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card className="p-4">
-                <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <span>Fulfillment — COGS</span>
-                  <ExplainerPopover
-                    label="Fulfillment — COGS"
-                    body={CATEGORY_EXPLAINERS.fulfillment_cogs.body}
-                    testId="button-explain-fulfillment-cogs"
-                  />
-                </div>
-                <div className="text-xl font-bold">{formatCurrency(metrics.fulfillmentCogs)}</div>
-              </Card>
-              <Card className="p-4">
-                <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <span>Fulfillment — Services</span>
-                  <ExplainerPopover
-                    label="Fulfillment — Services"
-                    body={CATEGORY_EXPLAINERS.fulfillment_services.body}
-                    testId="button-explain-fulfillment-services"
-                  />
-                </div>
-                <div className="text-xl font-bold">{formatCurrency(metrics.fulfillmentServices)}</div>
-              </Card>
-            </div>
-
             <h2 className="text-xl font-semibold mt-10 mb-2">Profit Conversion (Ascent)</h2>
             <p className="text-sm text-muted-foreground mb-4">
               What happens to the profit after the business has earned it. An individual's tax
@@ -493,7 +414,7 @@ export default function Dashboard() {
                 </div>
                 <div className="text-2xl font-bold">{formatCurrency(metrics.operationalNetProfit)}</div>
                 <div className="text-xs text-muted-foreground mt-1">
-                  {formatPercent(metrics.operationalNetProfitPct)} of gross profit
+                  {formatPercent(pctOfRevenue(metrics.operationalNetProfit))} of revenue
                 </div>
               </Card>
               <Card className="p-4">
@@ -507,7 +428,7 @@ export default function Dashboard() {
                 </div>
                 <div className="text-2xl font-bold">{formatCurrency(metrics.taxStrategy)}</div>
                 <div className="text-xs text-muted-foreground mt-1">
-                  {formatPercent(metrics.taxStrategyPct)} of gross profit — no target: minimize this
+                  {formatPercent(pctOfRevenue(metrics.taxStrategy))} of revenue — no target: minimize this
                 </div>
               </Card>
               <Card className="p-4 bg-muted/40">
@@ -521,7 +442,7 @@ export default function Dashboard() {
                 </div>
                 <div className="text-2xl font-bold">{formatCurrency(metrics.taxableNetProfit)}</div>
                 <div className="text-xs text-muted-foreground mt-1">
-                  {formatPercent(metrics.taxableNetProfitPct)} of gross profit
+                  {formatPercent(pctOfRevenue(metrics.taxableNetProfit))} of revenue
                 </div>
               </Card>
             </div>
@@ -554,24 +475,6 @@ export default function Dashboard() {
             )}
           </div>
 
-          {variances.length > 0 && (
-            <div>
-              <h2 className="text-xl font-semibold mb-6">Top {variances.length} Variances</h2>
-              <div className="space-y-4">
-                {variances.map((v: any, i: number) => (
-                  <VarianceAlert
-                    key={i}
-                    category={v.category}
-                    current={v.current}
-                    target={v.target}
-                    variance={v.variance}
-                    status={v.status}
-                    recommendation={getVarianceRecommendation(v.category)}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
 
         </div>
       </div>
