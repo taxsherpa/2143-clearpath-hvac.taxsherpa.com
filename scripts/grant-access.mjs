@@ -66,6 +66,21 @@ if (Number.isNaN(startsAt.getTime())) usage(`Invalid --starts date: ${startsArg}
 function connectionString() {
   if (!process.env.DATABASE_URL) usage('DATABASE_URL is not set. Run through `railway run`, or set it for a local database.');
   const url = new URL(process.env.DATABASE_URL);
+  // Railway injects the TCP proxy's host and port into the Postgres service itself once Public
+  // Access is on, so `railway run --service Postgres` can find them with nothing to copy by hand.
+  if (url.hostname.endsWith('.railway.internal')
+      && process.env.RAILWAY_TCP_PROXY_DOMAIN && process.env.RAILWAY_TCP_PROXY_PORT) {
+    url.hostname = process.env.RAILWAY_TCP_PROXY_DOMAIN;
+    url.port = process.env.RAILWAY_TCP_PROXY_PORT;
+    return url.toString();
+  }
+  // Same swap from an environment variable set by hand, for a machine with no G: drive mounted:
+  //   $env:POSTGRES_PUBLIC_ADDRESS = "<proxy host>:<port>"   (host and port only, never the password)
+  if (url.hostname.endsWith('.railway.internal') && process.env.POSTGRES_PUBLIC_ADDRESS) {
+    const [h, p] = process.env.POSTGRES_PUBLIC_ADDRESS.split(':');
+    if (h && p) { url.hostname = h; url.port = p; }
+    return url.toString();
+  }
   if (url.hostname.endsWith('.railway.internal') && fs.existsSync(SECRETS)) {
     const env = Object.fromEntries(
       fs.readFileSync(SECRETS, 'utf8').split(/\r?\n/).filter(l => l.includes('='))

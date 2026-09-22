@@ -17,13 +17,16 @@ REM Without --apply it is a dry run: it prints what it would write and stops.
 REM Every grant written here carries source 'manual', so a comp can be revoked without touching
 REM a purchase. Purchases arrive through the GHL webhook, never through this script.
 
-if "%DATABASE_PUBLIC_URL%"=="" (
+if not "%DATABASE_PUBLIC_URL%"=="" set DATABASE_URL=%DATABASE_PUBLIC_URL%
+
+if "%DATABASE_PUBLIC_URL%"=="" if "%POSTGRES_PUBLIC_ADDRESS%"=="" if "%RAILWAY_TCP_PROXY_DOMAIN%"=="" (
   echo.
-  echo DATABASE_PUBLIC_URL is empty.
+  echo Neither DATABASE_PUBLIC_URL nor POSTGRES_PUBLIC_ADDRESS is set.
   echo Run this through the Railway CLI against the Postgres service, with Public Access enabled:
   echo   railway.cmd run --service Postgres cmd /c scripts\grant.cmd ^<email^> [options]
+  echo If the service exposes no DATABASE_PUBLIC_URL, set the proxy address yourself first
+  echo ^(host and port only, the password stays in Railway^):
+  echo   $env:POSTGRES_PUBLIC_ADDRESS = "hostname.proxy.rlwy.net:PORT"
   exit /b 1
 )
-
-set DATABASE_URL=%DATABASE_PUBLIC_URL%
 node scripts/grant-access.mjs %*
