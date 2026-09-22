@@ -273,10 +273,19 @@ export default function Dashboard() {
     const url = isAnnualView
       ? `/api/reports/annual/export/pdf${annualExportQs}`
       : `/api/uploads/${uploadId}/export/pdf${exportQs}`;
-    window.open(url, '_blank');
+    // An anchor click carries the user gesture with it, so pop-up blockers leave it alone —
+    // window.open() was silently blocked for at least one tester (2026-09-22) and the button
+    // looked broken.
+    const a = document.createElement('a');
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
     toast({
-      title: "Export started",
-      description: "Summary report is opening in a new tab",
+      title: "Report opened in a new tab",
+      description: "Print it from there (Ctrl+P / Cmd+P) and choose Save as PDF.",
     });
   };
 

@@ -449,7 +449,15 @@ function convertToPlNodes(lineItems: ParsedLineItem[]): PlNode[] {
       }
     }
 
-    const isHeader = item.level === 0 && isSectionHeader(item.label, item.amount);
+    // A row with rows nested under it is a parent, and its amount is the sum of those rows —
+    // counting it as a line of its own double-counts the section. The CSV path already avoids
+    // this (see isRollupRow in csv-parser.ts); the PDF path only recognised a section header
+    // when the amount was zero AND the label was one of six exact names, so a QuickBooks
+    // heading carrying its own subtotal ("Payroll Expenses 120,000") came through as a
+    // mappable expense. Found 2026-09-22 on a real P&L: headings were being scored as costs.
+    const nextItem = lineItems[i + 1];
+    const hasChildren = Boolean(nextItem && nextItem.level > item.level);
+    const isHeader = (item.level === 0 && isSectionHeader(item.label, item.amount)) || hasChildren;
     
     const normalizedAmount = normalizePdfAmountForCategory(item.amount, suggestedCategory);
 
@@ -465,7 +473,7 @@ function convertToPlNodes(lineItems: ParsedLineItem[]): PlNode[] {
       level: item.level,
       displayOrder: i,
       amountCents,
-      isRollup: item.isTotal,
+      isRollup: item.isTotal || hasChildren,
       parentTempId,
       sourcePath,
       suggestedCategory: isHeader ? undefined : suggestedCategory,

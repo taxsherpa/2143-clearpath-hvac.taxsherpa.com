@@ -257,6 +257,26 @@ export function scoreHvac(
       };
     }
 
+    // A cost category at exactly 0% is almost never a shop that spends nothing there — it is a
+    // P&L where nothing got mapped into it. Scoring it "ahead of best-in-class" congratulated the
+    // owner for a mapping gap (found 2026-09-22 on a test upload where fulfilment read 0.0% and
+    // gross profit equalled revenue). Say what actually happened and point at the review step.
+    if (actual === 0 && direction === "lower-is-better") {
+      return {
+        category,
+        label: CATEGORY_LABELS[category],
+        actual: 0,
+        average: bench.average,
+        exceptional: bench.exceptional,
+        gap: null,
+        status: "unknown" as const,
+        interpretation:
+          "Nothing in this P&L was mapped to this category, so there's nothing to score yet. " +
+          "Either the shop really has no cost here, or those lines landed somewhere else — " +
+          "check them in step 2, Review & Map.",
+      };
+    }
+
     // Positive gap always means "better than the exceptional column", whichever way the category
     // runs, so the UI never has to special-case a direction.
     //

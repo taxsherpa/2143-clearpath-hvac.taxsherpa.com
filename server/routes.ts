@@ -7,6 +7,7 @@ import type { PeriodType } from "@shared/schema";
 import { parseCSV } from "./lib/csv-parser";
 import { parsePDF, MultiColumnPDFError } from "./lib/pdf-parser";
 import { scoreMetrics as scoreHvacMetrics } from "./lib/hvac-benchmarks";
+import { buildHvacReportHtml } from "./lib/hvac-report-html";
 import { detectOwnerCompInOpex } from "./lib/hvac-accounts";
 import {
   loadPeriodMetrics,
@@ -947,14 +948,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const periodBasisText = describePeriodBasis(basis.periodType, basis.monthsCovered, basis.note);
       const periodLabel = formatPeriodRange(period.periodStart, period.periodEnd, period.periodType);
 
-      const html = buildReportHtml({
-        title: "ClearPath Basecamp Report",
+      // The HVAC scorecard, the same one the dashboard shows. This used to build the generic
+      // Basecamp report, so the file a buyer took home contradicted the screen they read it on.
+      const hvac = scoreHvacMetrics(metrics, basis.monthsCovered);
+      const periodNodes = await loadPeriodNodes(period.id);
+      const ownerCompInOpex = detectOwnerCompInOpex(
+        periodNodes.map((n) => ({
+          label: n.label,
+          category: n.category,
+          amount: n.amountCents === null ? null : n.amountCents / 100,
+        })),
+      );
+
+      const html = buildHvacReportHtml({
         periodLabel,
         periodBasisText,
-        tier,
-        metrics,
-        benchmarks,
-        variances,
+        revenue: metrics.revenue ?? null,
+        hvac,
+        ownerCompInOpex: Boolean(ownerCompInOpex),
       });
 
       res.setHeader('Content-Type', 'text/html');
@@ -1149,14 +1160,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const periodLabel = parsed.mode === "full-year" ? `FY${parsed.year}` : `YTD ${parsed.year}`;
       const fileTag = parsed.mode === "full-year" ? `fy${parsed.year}` : `ytd${parsed.year}`;
 
-      const html = buildReportHtml({
-        title: "ClearPath Basecamp Report",
+      const hvac = scoreHvacMetrics(construction.metrics, construction.monthsCovered ?? 12);
+
+      const html = buildHvacReportHtml({
         periodLabel,
         periodBasisText,
-        tier,
-        metrics: construction.metrics,
-        benchmarks,
-        variances,
+        revenue: construction.metrics.revenue ?? null,
+        hvac,
       });
 
       res.setHeader('Content-Type', 'text/html');
