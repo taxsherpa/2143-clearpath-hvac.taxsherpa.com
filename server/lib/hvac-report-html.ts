@@ -23,12 +23,17 @@ export function buildHvacReportHtml(opts: {
   const pct = (v: number | null) => (v === null ? "—" : `${v.toFixed(1)}%`);
   const esc = (s: string) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c] as string));
 
+  // Word for word what HvacScorecard.tsx shows on screen: the printed report and the dashboard
+  // must not describe the same number two different ways.
   const STATUS_TEXT: Record<string, string> = {
     ahead: "Ahead of best-in-class",
-    "on-track": "Between average and best-in-class",
-    behind: "Behind average",
-    unknown: "Not scored",
+    "on-track": "Close to best-in-class",
+    behind: "Behind best-in-class",
+    unknown: "Not enough data",
   };
+  // "22.7 pts better" / "39.4 pts to close", the same gap line the dashboard prints beside the pill.
+  const gapText = (gap: number | null) =>
+    gap === null ? "" : `${Math.abs(gap).toFixed(1)} pts ${gap > 0 ? "better" : "to close"}`;
 
   const rows = hvac.scores
     .map(
@@ -39,6 +44,7 @@ export function buildHvacReportHtml(opts: {
         <td class="num">${pct(s.average)}</td>
         <td class="num">${pct(s.exceptional)}</td>
         <td class="stand"><span class="pill ${s.status}">${STATUS_TEXT[s.status] ?? s.status}</span>
+          ${s.gap === null ? "" : `<span class="gap">${gapText(s.gap)}</span>`}
           ${s.interpretation ? `<p>${esc(s.interpretation)}</p>` : ""}</td>
       </tr>`,
     )
@@ -79,6 +85,7 @@ export function buildHvacReportHtml(opts: {
   .pill.on-track { background:#DBEAFE; color:#1E3A8A; }
   .pill.behind { background:#FEE2E2; color:#7F1D1D; }
   .pill.unknown { background:#F1F5F9; color:#475569; }
+  .gap { color: var(--muted); font-size: .82rem; margin-left: 8px; }
   .note { background:#FFF8E6; border-left:4px solid var(--gold); padding:10px 14px; color:#5B4A18;
     font-size:.9rem; margin: 18px 0 0; }
   footer { margin-top: 36px; color: var(--muted); font-size: .82rem; border-top: 1px solid var(--line); padding-top: 14px; }
